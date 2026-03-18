@@ -8,7 +8,7 @@
     />
 
     <title>
-      Plug Radio Station | Live365 Radio, Artist Promotion, App, YouTube &
+      Plug Radio Station | Live365 Radio, Artist Promotion, App, YouTube &amp;
       Apple Music
     </title>
 
@@ -151,13 +151,8 @@
             >
               Follow Plug Radio
             </a>
-            <a
-              class="btn btn-primary"
-              href="https://live365.com/station/Plug-Radio-a37141"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Listen Live
+            <a class="btn btn-primary" href="#listen-player">
+              Play on Site
             </a>
           </div>
         </div>
@@ -186,8 +181,11 @@
             </p>
 
             <div class="hero-actions">
+              <a class="btn btn-primary btn-lg" href="#listen-player">
+                Play Live on Site
+              </a>
               <a
-                class="btn btn-primary btn-lg"
+                class="btn btn-outline btn-lg"
                 href="https://live365.com/station/Plug-Radio-a37141"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -257,10 +255,10 @@
                 </article>
 
                 <article class="mini-card">
-                  <span class="mini-label">App Store</span>
-                  <h3>Plug Radio mobile app</h3>
+                  <span class="mini-label">Website Player</span>
+                  <h3>Play right on the homepage</h3>
                   <p>
-                    Download the free Plug Radio app for iPhone and iPad.
+                    Visitors can now press play and hear the station directly on the site.
                   </p>
                 </article>
 
@@ -306,11 +304,11 @@
         <div class="container">
           <div class="section-heading reveal">
             <p class="eyebrow">Listen Live</p>
-            <h2 id="listen-title">Stream Plug Radio through its official Live365 station</h2>
+            <h2 id="listen-title">Play Plug Radio directly from the homepage</h2>
             <p class="section-text">
-              Plug Radio describes itself as an urban station with a Top 40
-              twist. Its Live365 listing also places it across Hip-Hop/Rap,
-              Pop, Top 40, and Urban &amp; R&amp;B listening categories.
+              Visitors can now press play right on the website, while still
+              having the option to open the official Live365 station page in a
+              separate tab.
             </p>
           </div>
 
@@ -318,16 +316,44 @@
             <div class="listen-card reveal">
               <div class="card-topline">
                 <span class="signal-dot"></span>
-                <span>Official live stream access</span>
+                <span>Embedded website player</span>
               </div>
 
-              <h3>Plug Radio on Live365</h3>
+              <h3>Live Plug Radio Player</h3>
               <p class="card-copy">
-                Tap into the official Plug Radio station page to stream live and
-                stay connected to the station’s current rotation.
+                Press play below to hear Plug Radio live without leaving the website.
               </p>
 
-              <div class="hero-actions" style="margin: 26px 0 18px;">
+              <div
+                class="page-card"
+                id="listen-player"
+                style="padding: 18px; margin: 26px 0 20px;"
+              >
+                <span class="info-kicker">Website Player</span>
+                <h3 style="margin: 14px 0 10px;">Play Plug Radio right here</h3>
+                <p style="margin-bottom: 16px;">
+                  Use the embedded player below to listen directly from the homepage.
+                </p>
+
+                <!--
+                  Live365 supports embeddable player widgets for station websites.
+                  If your station dashboard gives you a different player snippet,
+                  replace this iframe with the exact code from:
+                  Live365 Dashboard → Listen → Embeds → Player
+                -->
+                <iframe
+                  title="Plug Radio Live365 Player"
+                  src="https://live365.com/embed/player.html?station=a37141&s=xl&m=dark"
+                  width="100%"
+                  height="320"
+                  frameborder="0"
+                  allow="autoplay"
+                  loading="lazy"
+                  style="border: 0; border-radius: 18px; overflow: hidden; background: #0b0f18;"
+                ></iframe>
+              </div>
+
+              <div class="hero-actions" style="margin: 12px 0 18px;">
                 <a
                   class="btn btn-primary"
                   href="https://live365.com/station/Plug-Radio-a37141"
@@ -406,7 +432,7 @@
               </p>
               <ul>
                 <li>Live365 streaming access</li>
-                <li>Urban + Top 40 blend</li>
+                <li>Website player on homepage</li>
                 <li>Built for repeat listening</li>
               </ul>
             </article>

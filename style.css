@@ -9,10 +9,10 @@
   --bg-soft: #0a0d14;
   --bg-elevated: #111622;
   --bg-deep: #06080e;
-  --bg-card: rgba(12, 15, 24, 0.82);
+  --bg-card: rgba(12, 15, 24, 0.84);
 
-  --panel: rgba(15, 18, 28, 0.78);
-  --panel-strong: rgba(12, 15, 24, 0.92);
+  --panel: rgba(15, 18, 28, 0.8);
+  --panel-strong: rgba(12, 15, 24, 0.94);
   --panel-light: rgba(255, 255, 255, 0.04);
 
   --line: rgba(255, 255, 255, 0.09);
@@ -53,6 +53,13 @@
     rgba(255, 122, 24, 1) 0%,
     rgba(255, 179, 71, 1) 42%,
     rgba(255, 77, 109, 1) 100%
+  );
+
+  --gradient-main-soft: linear-gradient(
+    135deg,
+    rgba(255, 122, 24, 0.18) 0%,
+    rgba(255, 179, 71, 0.12) 42%,
+    rgba(255, 77, 109, 0.16) 100%
   );
 
   --gradient-border: linear-gradient(
@@ -177,7 +184,8 @@ a:focus-visible,
 button:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
-select:focus-visible {
+select:focus-visible,
+iframe:focus-visible {
   outline: 2px solid rgba(255, 179, 71, 0.92);
   outline-offset: 3px;
 }
@@ -199,6 +207,124 @@ select:focus-visible {
   border-radius: 999px;
   border: 2px solid transparent;
   background-clip: padding-box;
+}
+
+/* =========================
+   KEYFRAMES
+========================= */
+
+@keyframes radioPulse {
+  0%,
+  100% {
+    transform: scaleY(0.72);
+    opacity: 0.72;
+  }
+  50% {
+    transform: scaleY(1.08);
+    opacity: 1;
+  }
+}
+
+@keyframes glowBreath {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 0 rgba(255, 122, 24, 0.18),
+      0 10px 30px rgba(0, 0, 0, 0.18);
+  }
+  50% {
+    box-shadow:
+      0 0 0 10px rgba(255, 122, 24, 0),
+      0 18px 40px rgba(0, 0, 0, 0.28);
+  }
+}
+
+@keyframes liveBlink {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  45% {
+    opacity: 0.72;
+    transform: scale(0.92);
+  }
+}
+
+@keyframes orbFloatLeft {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(34px, -18px, 0) scale(1.06);
+  }
+}
+
+@keyframes orbFloatRight {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-34px, 22px, 0) scale(1.08);
+  }
+}
+
+@keyframes floatCardA {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes floatCardB {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(12px);
+  }
+}
+
+@keyframes heroPanelGlow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.02),
+      0 28px 88px rgba(0, 0, 0, 0.48);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(255, 179, 71, 0.08),
+      0 28px 88px rgba(0, 0, 0, 0.48),
+      0 0 80px rgba(255, 122, 24, 0.08);
+  }
+}
+
+@keyframes shineSweep {
+  0% {
+    transform: translateX(-135%) skewX(-18deg);
+  }
+  100% {
+    transform: translateX(155%) skewX(-18deg);
+  }
+}
+
+@keyframes badgePulse {
+  0%,
+  100% {
+    transform: translateY(0);
+    box-shadow: 0 0 0 0 rgba(45, 212, 191, 0.18);
+  }
+  50% {
+    transform: translateY(-2px);
+    box-shadow: 0 0 0 10px rgba(45, 212, 191, 0);
+  }
 }
 
 /* =========================
@@ -230,6 +356,7 @@ select:focus-visible {
   left: -80px;
   top: 120px;
   background: rgba(255, 122, 24, 0.14);
+  animation: orbFloatLeft 14s ease-in-out infinite;
 }
 
 .site-bg::after {
@@ -238,6 +365,7 @@ select:focus-visible {
   right: -70px;
   top: 220px;
   background: rgba(139, 92, 246, 0.12);
+  animation: orbFloatRight 16s ease-in-out infinite;
 }
 
 .site-noise {
@@ -441,11 +569,12 @@ select:focus-visible {
 .topbar-links a {
   color: var(--muted);
   font-size: 0.88rem;
-  transition: color 0.2s ease;
+  transition: color 0.2s ease, transform 0.2s ease;
 }
 
 .topbar-links a:hover {
   color: #fff;
+  transform: translateY(-1px);
 }
 
 .nav-wrap {
@@ -480,6 +609,7 @@ select:focus-visible {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.09),
     var(--shadow-sm);
+  animation: glowBreath 4.2s ease-in-out infinite;
 }
 
 .brand-copy {
@@ -625,10 +755,11 @@ select:focus-visible {
   letter-spacing: -0.01em;
   transition:
     transform 0.2s ease,
-    box-shadow 0.2s ease,
-    border-color 0.2s ease,
-    background 0.2s ease,
-    color 0.2s ease;
+    box-shadow 0.24s ease,
+    border-color 0.24s ease,
+    background 0.24s ease,
+    color 0.24s ease,
+    filter 0.24s ease;
   will-change: transform;
   overflow: hidden;
 }
@@ -637,22 +768,21 @@ select:focus-visible {
   content: "";
   position: absolute;
   inset: 0;
-  transform: translateX(-100%);
+  transform: translateX(-110%);
   background: linear-gradient(
     120deg,
     transparent 0%,
-    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.09) 50%,
     transparent 100%
   );
-  transition: transform 0.5s ease;
 }
 
 .btn:hover::before {
-  transform: translateX(100%);
+  animation: shineSweep 0.8s ease forwards;
 }
 
 .btn:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px);
 }
 
 .btn:active {
@@ -665,12 +795,15 @@ select:focus-visible {
   box-shadow:
     0 12px 30px rgba(255, 122, 24, 0.22),
     inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  animation: glowBreath 3.8s ease-in-out infinite;
 }
 
 .btn-primary:hover {
   box-shadow:
-    0 16px 38px rgba(255, 122, 24, 0.3),
+    0 18px 42px rgba(255, 122, 24, 0.34),
+    0 0 24px rgba(255, 122, 24, 0.16),
     inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  filter: saturate(1.04);
 }
 
 .btn-outline {
@@ -683,6 +816,9 @@ select:focus-visible {
 .btn-outline:hover {
   border-color: rgba(255, 255, 255, 0.22);
   background: rgba(255, 255, 255, 0.055);
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.22),
+    0 0 0 1px rgba(255, 255, 255, 0.02);
 }
 
 .btn-lg {
@@ -697,11 +833,12 @@ select:focus-visible {
 .text-link {
   color: #ffd5b0;
   font-weight: 700;
-  transition: color 0.2s ease;
+  transition: color 0.2s ease, transform 0.2s ease;
 }
 
 .text-link:hover {
   color: #fff;
+  transform: translateX(2px);
 }
 
 .panel-kicker,
@@ -744,6 +881,7 @@ select:focus-visible {
   font-weight: 800;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+  animation: badgePulse 2.4s ease-in-out infinite;
 }
 
 .live-pill::before {
@@ -753,6 +891,7 @@ select:focus-visible {
   border-radius: 999px;
   background: var(--success);
   box-shadow: 0 0 14px rgba(45, 212, 191, 0.6);
+  animation: liveBlink 1.6s ease-in-out infinite;
 }
 
 /* =========================
@@ -773,6 +912,7 @@ select:focus-visible {
 }
 
 .station-ticker {
+  position: relative;
   align-items: center;
   padding: 14px 18px;
   border-radius: 999px;
@@ -781,6 +921,20 @@ select:focus-visible {
     linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015)),
     rgba(255, 255, 255, 0.02);
   overflow: hidden;
+}
+
+.station-ticker::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.06) 50%,
+    transparent 100%
+  );
+  animation: shineSweep 4.8s linear infinite;
 }
 
 .station-ticker span {
@@ -842,36 +996,30 @@ select:focus-visible {
   height: 28px;
   animation-delay: 0s;
 }
+
 .equalizer-bars span:nth-child(2) {
   height: 54px;
   animation-delay: 0.14s;
 }
+
 .equalizer-bars span:nth-child(3) {
   height: 38px;
   animation-delay: 0.28s;
 }
+
 .equalizer-bars span:nth-child(4) {
   height: 72px;
   animation-delay: 0.42s;
 }
+
 .equalizer-bars span:nth-child(5) {
   height: 46px;
   animation-delay: 0.56s;
 }
+
 .equalizer-bars span:nth-child(6) {
   height: 62px;
   animation-delay: 0.7s;
-}
-
-@keyframes radioPulse {
-  0%, 100% {
-    transform: scaleY(0.72);
-    opacity: 0.72;
-  }
-  50% {
-    transform: scaleY(1.06);
-    opacity: 1;
-  }
 }
 
 .rank-badge,
@@ -1005,6 +1153,34 @@ select:focus-visible {
   backdrop-filter: blur(15px);
 }
 
+.listen-card::before,
+.info-card::before,
+.submit-form-card::before,
+.contact-card::before,
+.social-card::before,
+.show-card::before,
+.benefit-card::before,
+.page-card::before,
+.content-card::before,
+.stat-card::before,
+.detail-card::before,
+.list-card::before,
+.cta-band::before,
+.schedule-card::before,
+.timeline-item::before,
+.form-shell::before,
+.proof-card::before,
+.mini-card::before,
+.quick-link::before,
+.contact-item::before,
+.station-metric::before,
+.station-callout::before,
+.radio-note::before,
+.editorial-note::before,
+.station-quote::before {
+  pointer-events: none;
+}
+
 .listen-card,
 .info-card,
 .submit-form-card,
@@ -1091,12 +1267,14 @@ select:focus-visible {
 .station-callout,
 .radio-note,
 .editorial-note,
-.station-quote {
+.station-quote,
+.proof-card,
+.mini-card {
   transition:
-    transform 0.24s ease,
-    border-color 0.24s ease,
-    box-shadow 0.24s ease,
-    background 0.24s ease;
+    transform 0.26s ease,
+    border-color 0.26s ease,
+    box-shadow 0.26s ease,
+    background 0.26s ease;
 }
 
 .show-card:hover,
@@ -1117,12 +1295,15 @@ select:focus-visible {
 .station-callout:hover,
 .radio-note:hover,
 .editorial-note:hover,
-.station-quote:hover {
-  transform: translateY(-4px);
+.station-quote:hover,
+.proof-card:hover,
+.mini-card:hover {
+  transform: translateY(-6px);
   border-color: rgba(255, 255, 255, 0.12);
   box-shadow:
-    0 22px 50px rgba(0, 0, 0, 0.34),
-    0 0 0 1px rgba(255, 255, 255, 0.02);
+    0 24px 56px rgba(0, 0, 0, 0.34),
+    0 0 0 1px rgba(255, 255, 255, 0.02),
+    0 0 24px rgba(255, 122, 24, 0.04);
 }
 
 /* =========================
@@ -1196,9 +1377,12 @@ select:focus-visible {
 .hero-main-panel {
   position: relative;
   z-index: 2;
+  animation: heroPanelGlow 5.5s ease-in-out infinite;
 }
 
 .hero-panel {
+  position: relative;
+  overflow: hidden;
   padding: 28px;
   border-radius: 30px;
   background:
@@ -1207,6 +1391,24 @@ select:focus-visible {
   border: 1px solid rgba(255, 255, 255, 0.09);
   box-shadow: var(--shadow-lg);
   backdrop-filter: blur(18px);
+}
+
+.hero-panel::after {
+  content: "";
+  position: absolute;
+  top: -20%;
+  left: -35%;
+  width: 42%;
+  height: 140%;
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.06) 50%,
+    transparent 100%
+  );
+  transform: skewX(-18deg);
+  animation: shineSweep 6.5s linear infinite;
+  pointer-events: none;
 }
 
 .panel-head {
@@ -1277,11 +1479,13 @@ select:focus-visible {
 .floating-card-a {
   left: -26px;
   bottom: 76px;
+  animation: floatCardA 5.6s ease-in-out infinite;
 }
 
 .floating-card-b {
   right: -20px;
   top: 46px;
+  animation: floatCardB 6.4s ease-in-out infinite;
 }
 
 /* =========================
@@ -1334,7 +1538,8 @@ select:focus-visible {
   border-color: rgba(45, 212, 191, 0.24);
   box-shadow:
     0 0 0 1px rgba(45, 212, 191, 0.05),
-    0 20px 48px rgba(0, 0, 0, 0.3);
+    0 20px 48px rgba(0, 0, 0, 0.3),
+    0 0 36px rgba(45, 212, 191, 0.08);
 }
 
 .listen-actions {
@@ -1469,6 +1674,7 @@ select:focus-visible {
   background: var(--gradient-main);
   color: #160d07;
   box-shadow: 0 10px 28px rgba(255, 122, 24, 0.2);
+  animation: glowBreath 4.2s ease-in-out infinite;
 }
 
 .step-card h3 {
@@ -1536,7 +1742,8 @@ select:focus-visible {
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease,
-    background 0.2s ease;
+    background 0.2s ease,
+    transform 0.2s ease;
 }
 
 .field select {
@@ -1564,6 +1771,7 @@ select:focus-visible {
 .field input:focus,
 .field textarea:focus,
 .field select:focus {
+  transform: translateY(-1px);
   border-color: rgba(255, 179, 71, 0.7);
   background: rgba(255, 255, 255, 0.05);
   box-shadow:
@@ -1598,6 +1806,7 @@ select:focus-visible {
     rgba(8, 10, 16, 0.95);
   border: 1px solid rgba(255, 255, 255, 0.11);
   box-shadow: var(--shadow-lg);
+  animation: floatCardA 7.2s ease-in-out infinite;
 }
 
 .app-device::before {
@@ -1939,11 +2148,12 @@ select:focus-visible {
   display: block;
   margin-bottom: 10px;
   color: var(--muted);
-  transition: color 0.2s ease;
+  transition: color 0.2s ease, transform 0.2s ease;
 }
 
 .footer-links a:hover {
   color: #fff;
+  transform: translateX(2px);
 }
 
 .footer-bottom {

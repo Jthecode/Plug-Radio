@@ -3,7 +3,8 @@
    File: script.js
    Role: Navigation, smooth scroll, reveal motion,
          active nav state, sticky header polish,
-         multi-page support, audio state
+         multi-page support, audio state, premium
+         hover motion, elite micro-interactions
 ========================================= */
 
 (() => {
@@ -17,21 +18,37 @@
 
   onReady(() => {
     const body = document.body;
+    const docEl = document.documentElement;
     const header = document.querySelector(".site-header");
     const navToggle = document.querySelector(".nav-toggle");
     const siteNav = document.querySelector("#site-nav");
+
     const navLinks = Array.from(document.querySelectorAll(".site-nav a"));
     const anchorLinks = Array.from(document.querySelectorAll('a[href^="#"]'));
     const revealItems = Array.from(document.querySelectorAll(".reveal"));
     const sectionNodes = Array.from(document.querySelectorAll("main section[id]"));
     const yearEl = document.getElementById("year");
-    const player = document.querySelector(".radio-player");
+
+    const mediaPlayers = Array.from(document.querySelectorAll(".radio-player"));
     const listenSection = document.querySelector("#listen");
     const externalLinks = Array.from(document.querySelectorAll('a[target="_blank"]'));
 
+    const heroVisual = document.querySelector(".hero-visual");
+    const heroPanel = document.querySelector(".hero-main-panel");
+    const buttons = Array.from(document.querySelectorAll(".btn"));
+
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const hasFinePointer = window.matchMedia("(pointer: fine)").matches;
+
+    let lastScrollY = window.scrollY;
+    let ticking = false;
+    let currentPath = "";
+
     /* =========================================
-       Constants / helpers
+       Helpers
     ========================================== */
+
+    const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
     const normalizePath = (value) => {
       if (!value) return "/";
@@ -53,7 +70,7 @@
       }
     };
 
-    const currentPath = normalizePath(window.location.pathname);
+    const getCurrentPath = () => normalizePath(window.location.pathname);
 
     const isSamePageHashLink = (href) => {
       if (!href || !href.startsWith("#")) return false;
@@ -65,16 +82,15 @@
       return header.offsetHeight + 10;
     };
 
-    const scrollToTarget = (target) => {
+    const scrollToTarget = (target, behavior = "smooth") => {
       if (!target) return;
 
       const offset = getHeaderOffset();
-      const targetTop =
-        target.getBoundingClientRect().top + window.scrollY - offset;
+      const top = target.getBoundingClientRect().top + window.scrollY - offset;
 
       window.scrollTo({
-        top: Math.max(targetTop, 0),
-        behavior: "smooth",
+        top: Math.max(top, 0),
+        behavior,
       });
     };
 
@@ -112,25 +128,138 @@
       listenSection.classList.toggle("is-playing", isPlaying);
     };
 
+    const clearNavState = () => {
+      navLinks.forEach((link) => {
+        link.classList.remove("is-active");
+        link.removeAttribute("aria-current");
+      });
+    };
+
+    const setActiveNavByPath = () => {
+      if (!navLinks.length) return false;
+
+      let matched = false;
+
+      navLinks.forEach((link) => {
+        const href = link.getAttribute("href") || "";
+
+        if (!href || href.startsWith("#")) return;
+
+        const linkPath = normalizePath(href);
+
+        if (linkPath === currentPath) {
+          link.classList.add("is-active");
+          link.setAttribute("aria-current", "page");
+          matched = true;
+        }
+      });
+
+      return matched;
+    };
+
+    const setActiveNavBySection = () => {
+      if (!navLinks.length || !sectionNodes.length) return false;
+
+      const scrollPosition = window.scrollY + getHeaderOffset() + 70;
+      let currentId = "";
+
+      sectionNodes.forEach((section) => {
+        const top = section.offsetTop;
+        const height = section.offsetHeight;
+
+        if (scrollPosition >= top && scrollPosition < top + height) {
+          currentId = section.id;
+        }
+      });
+
+      if (!currentId && sectionNodes.length) {
+        const firstSection = sectionNodes[0];
+        if (window.scrollY < firstSection.offsetTop) {
+          currentId = firstSection.id;
+        }
+      }
+
+      if (!currentId) return false;
+
+      navLinks.forEach((link) => {
+        const href = link.getAttribute("href") || "";
+        if (href === `#${currentId}`) {
+          link.classList.add("is-active");
+          link.setAttribute("aria-current", "page");
+        }
+      });
+
+      return true;
+    };
+
+    const updateHeaderState = () => {
+      if (!header) return;
+
+      header.classList.toggle("is-scrolled", window.scrollY > 18);
+
+      const scrollingDown = window.scrollY > lastScrollY;
+      const farEnough = window.scrollY > 120;
+
+      if (scrollingDown && farEnough && !body.classList.contains("nav-open")) {
+        header.style.transform = "translateY(-100%)";
+      } else {
+        header.style.transform = "translateY(0)";
+      }
+
+      lastScrollY = window.scrollY;
+    };
+
+    const updateNavState = () => {
+      clearNavState();
+
+      currentPath = getCurrentPath();
+
+      const isHomeLikePath =
+        currentPath === "/" ||
+        currentPath === "/index.html" ||
+        currentPath.endsWith("/index") ||
+        currentPath.endsWith("/plug-radio-station");
+
+      if (isHomeLikePath && sectionNodes.length) {
+        const matchedSection = setActiveNavBySection();
+        if (matchedSection) return;
+      }
+
+      setActiveNavByPath();
+    };
+
+    const updateScrollProgress = () => {
+      const scrollable = Math.max(document.body.scrollHeight - window.innerHeight, 1);
+      const progress = clamp(window.scrollY / scrollable, 0, 1);
+      docEl.style.setProperty("--scroll-progress", progress.toFixed(4));
+    };
+
+    const requestScrollUpdate = () => {
+      if (ticking) return;
+
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        updateHeaderState();
+        updateNavState();
+        updateScrollProgress();
+        ticking = false;
+      });
+    };
+
     /* =========================================
-       Footer year
+       Boot state
     ========================================== */
+
+    body.classList.add("js-ready");
+    currentPath = getCurrentPath();
 
     if (yearEl) {
       yearEl.textContent = String(new Date().getFullYear());
     }
 
-    /* =========================================
-       Sticky header polish
-    ========================================== */
-
-    const updateHeaderState = () => {
-      if (!header) return;
-      header.classList.toggle("is-scrolled", window.scrollY > 18);
-    };
-
     updateHeaderState();
-    window.addEventListener("scroll", updateHeaderState, { passive: true });
+    updateNavState();
+    updateScrollProgress();
 
     /* =========================================
        Mobile nav
@@ -168,6 +297,13 @@
       }
     });
 
+    window.addEventListener("resize", () => {
+      if (window.innerWidth > 980) {
+        closeMobileNav();
+      }
+      updateNavState();
+    });
+
     /* =========================================
        Smooth scrolling for same-page anchors
     ========================================== */
@@ -182,18 +318,16 @@
         if (!target) return;
 
         event.preventDefault();
-        scrollToTarget(target);
         closeMobileNav();
+        scrollToTarget(target, prefersReducedMotion ? "auto" : "smooth");
 
         if (window.history && typeof window.history.pushState === "function") {
           window.history.pushState(null, "", href);
         }
+
+        window.setTimeout(updateNavState, 120);
       });
     });
-
-    /* =========================================
-       Scroll to hash target on initial load
-    ========================================== */
 
     const scrollToHashOnLoad = () => {
       const { hash } = window.location;
@@ -204,18 +338,26 @@
 
       window.requestAnimationFrame(() => {
         window.setTimeout(() => {
-          scrollToTarget(target);
-        }, 40);
+          scrollToTarget(target, prefersReducedMotion ? "auto" : "smooth");
+        }, 50);
       });
     };
 
     scrollToHashOnLoad();
 
     /* =========================================
-       Reveal on scroll
+       Reveal system
     ========================================== */
 
-    if ("IntersectionObserver" in window && revealItems.length) {
+    if (revealItems.length) {
+      revealItems.forEach((item, index) => {
+        const customDelay = Number(item.getAttribute("data-reveal-delay"));
+        const delay = Number.isFinite(customDelay) ? customDelay : Math.min(index % 8, 7) * 55;
+        item.style.transitionDelay = `${delay}ms`;
+      });
+    }
+
+    if ("IntersectionObserver" in window && revealItems.length && !prefersReducedMotion) {
       const revealObserver = new IntersectionObserver(
         (entries, observer) => {
           entries.forEach((entry) => {
@@ -227,7 +369,7 @@
         },
         {
           threshold: 0.14,
-          rootMargin: "0px 0px -40px 0px",
+          rootMargin: "0px 0px -44px 0px",
         }
       );
 
@@ -237,114 +379,72 @@
     }
 
     /* =========================================
-       Nav active state
+       Elite hero parallax
     ========================================== */
 
-    const clearNavState = () => {
-      navLinks.forEach((link) => {
-        link.classList.remove("is-active");
-        link.removeAttribute("aria-current");
-      });
-    };
+    if (heroVisual && heroPanel && hasFinePointer && !prefersReducedMotion) {
+      const maxTilt = 7;
+      const maxShift = 14;
 
-    const setActiveNavByPath = () => {
-      if (!navLinks.length) return false;
+      heroVisual.addEventListener("pointermove", (event) => {
+        const rect = heroVisual.getBoundingClientRect();
+        const px = (event.clientX - rect.left) / rect.width;
+        const py = (event.clientY - rect.top) / rect.height;
 
-      let matched = false;
+        const rotateY = (px - 0.5) * maxTilt;
+        const rotateX = (0.5 - py) * maxTilt;
+        const moveX = (px - 0.5) * maxShift;
+        const moveY = (py - 0.5) * maxShift;
 
-      navLinks.forEach((link) => {
-        const href = link.getAttribute("href") || "";
-
-        if (!href || href.startsWith("#")) return;
-
-        const linkPath = normalizePath(href);
-
-        if (linkPath === currentPath) {
-          link.classList.add("is-active");
-          link.setAttribute("aria-current", "page");
-          matched = true;
-        }
+        heroPanel.style.transform = `
+          perspective(1200px)
+          rotateX(${rotateX.toFixed(2)}deg)
+          rotateY(${rotateY.toFixed(2)}deg)
+          translate3d(${moveX.toFixed(1)}px, ${moveY.toFixed(1)}px, 0)
+        `;
       });
 
-      return matched;
-    };
-
-    const setActiveNavBySection = () => {
-      if (!navLinks.length || !sectionNodes.length) return false;
-
-      const scrollPosition = window.scrollY + getHeaderOffset() + 60;
-      let currentId = "";
-
-      sectionNodes.forEach((section) => {
-        const top = section.offsetTop;
-        const height = section.offsetHeight;
-
-        if (scrollPosition >= top && scrollPosition < top + height) {
-          currentId = section.id;
-        }
+      heroVisual.addEventListener("pointerleave", () => {
+        heroPanel.style.transform =
+          "perspective(1200px) rotateX(0deg) rotateY(0deg) translate3d(0, 0, 0)";
       });
+    }
 
-      if (!currentId && sectionNodes.length) {
-        const firstSection = sectionNodes[0];
-        if (window.scrollY < firstSection.offsetTop) {
-          currentId = firstSection.id;
-        }
-      }
+    /* =========================================
+       Premium button micro-interactions
+    ========================================== */
 
-      if (!currentId) return false;
+    if (buttons.length && hasFinePointer && !prefersReducedMotion) {
+      buttons.forEach((button) => {
+        button.addEventListener("pointermove", (event) => {
+          const rect = button.getBoundingClientRect();
+          const x = event.clientX - rect.left;
+          const y = event.clientY - rect.top;
 
-      navLinks.forEach((link) => {
-        const href = link.getAttribute("href") || "";
-        if (href === `#${currentId}`) {
-          link.classList.add("is-active");
-          link.setAttribute("aria-current", "page");
-        }
+          const moveX = ((x / rect.width) - 0.5) * 8;
+          const moveY = ((y / rect.height) - 0.5) * 6;
+
+          button.style.transform = `translate3d(${moveX.toFixed(1)}px, ${moveY.toFixed(1)}px, 0)`;
+        });
+
+        button.addEventListener("pointerleave", () => {
+          button.style.transform = "";
+        });
       });
-
-      return true;
-    };
-
-    const updateNavState = () => {
-      clearNavState();
-
-      const isHomeLikePath =
-        currentPath === "/" ||
-        currentPath === "/index.html" ||
-        currentPath.endsWith("/index") ||
-        currentPath.endsWith("/plug-radio-station");
-
-      if (isHomeLikePath && sectionNodes.length) {
-        const matchedSection = setActiveNavBySection();
-        if (matchedSection) return;
-      }
-
-      setActiveNavByPath();
-    };
-
-    updateNavState();
-    window.addEventListener("scroll", updateNavState, { passive: true });
-    window.addEventListener("resize", updateNavState);
-    window.addEventListener("hashchange", () => {
-      updateNavState();
-      scrollToHashOnLoad();
-    });
-
-    navLinks.forEach((link) => {
-      link.addEventListener("click", () => {
-        closeMobileNav();
-      });
-    });
+    }
 
     /* =========================================
        Audio player quality-of-life
     ========================================== */
 
-    if (player) {
-      player.addEventListener("play", () => setPlayerState(true));
-      player.addEventListener("pause", () => setPlayerState(false));
-      player.addEventListener("ended", () => setPlayerState(false));
-      player.addEventListener("emptied", () => setPlayerState(false));
-      player.addEventListener("error", () => setPlayerState(false));
+    if (mediaPlayers.length) {
+      mediaPlayers.forEach((player) => {
+        player.addEventListener("play", () => setPlayerState(true));
+        player.addEventListener("pause", () => setPlayerState(false));
+        player.addEventListener("ended", () => setPlayerState(false));
+        player.addEventListener("emptied", () => setPlayerState(false));
+        player.addEventListener("error", () => setPlayerState(false));
+      });
     }
 
     /* =========================================
@@ -359,6 +459,23 @@
       if (!relParts.includes("noreferrer")) relParts.push("noreferrer");
 
       link.setAttribute("rel", relParts.join(" ").trim());
+    });
+
+    /* =========================================
+       Global listeners
+    ========================================== */
+
+    window.addEventListener("scroll", requestScrollUpdate, { passive: true });
+
+    window.addEventListener("hashchange", () => {
+      updateNavState();
+      scrollToHashOnLoad();
+    });
+
+    navLinks.forEach((link) => {
+      link.addEventListener("click", () => {
+        closeMobileNav();
+      });
     });
   });
 })();
