@@ -27,6 +27,7 @@
     const yearEl = document.getElementById("year");
     const player = document.querySelector(".radio-player");
     const listenSection = document.querySelector("#listen");
+    const externalLinks = Array.from(document.querySelectorAll('a[target="_blank"]'));
 
     /* =========================================
        Constants / helpers
@@ -52,11 +53,10 @@
       }
     };
 
-    const getCurrentPath = () => normalizePath(window.location.pathname);
+    const currentPath = normalizePath(window.location.pathname);
 
-    const isSamePageLink = (href) => {
-      if (!href) return false;
-      if (!href.startsWith("#")) return false;
+    const isSamePageHashLink = (href) => {
+      if (!href || !href.startsWith("#")) return false;
       return href.length > 1;
     };
 
@@ -70,7 +70,7 @@
 
       const offset = getHeaderOffset();
       const targetTop =
-        target.getBoundingClientRect().top + window.pageYOffset - offset;
+        target.getBoundingClientRect().top + window.scrollY - offset;
 
       window.scrollTo({
         top: Math.max(targetTop, 0),
@@ -105,6 +105,11 @@
       } else {
         openMobileNav();
       }
+    };
+
+    const setPlayerState = (isPlaying) => {
+      if (!listenSection) return;
+      listenSection.classList.toggle("is-playing", isPlaying);
     };
 
     /* =========================================
@@ -171,7 +176,7 @@
       anchor.addEventListener("click", (event) => {
         const href = anchor.getAttribute("href");
 
-        if (!isSamePageLink(href)) return;
+        if (!isSamePageHashLink(href)) return;
 
         const target = document.querySelector(href);
         if (!target) return;
@@ -180,8 +185,8 @@
         scrollToTarget(target);
         closeMobileNav();
 
-        if (history.pushState) {
-          history.pushState(null, "", href);
+        if (window.history && typeof window.history.pushState === "function") {
+          window.history.pushState(null, "", href);
         }
       });
     });
@@ -233,9 +238,6 @@
 
     /* =========================================
        Nav active state
-       - supports multi-page navigation
-       - highlights current page links
-       - on one-page sections, updates by scroll
     ========================================== */
 
     const clearNavState = () => {
@@ -246,9 +248,8 @@
     };
 
     const setActiveNavByPath = () => {
-      if (!navLinks.length) return;
+      if (!navLinks.length) return false;
 
-      const currentPath = getCurrentPath();
       let matched = false;
 
       navLinks.forEach((link) => {
@@ -284,9 +285,9 @@
       });
 
       if (!currentId && sectionNodes.length) {
-        const first = sectionNodes[0];
-        if (window.scrollY < first.offsetTop) {
-          currentId = first.id;
+        const firstSection = sectionNodes[0];
+        if (window.scrollY < firstSection.offsetTop) {
+          currentId = firstSection.id;
         }
       }
 
@@ -306,16 +307,13 @@
     const updateNavState = () => {
       clearNavState();
 
-      const hasHash = Boolean(window.location.hash && window.location.hash !== "#");
-      const currentPath = getCurrentPath();
-
       const isHomeLikePath =
         currentPath === "/" ||
         currentPath === "/index.html" ||
         currentPath.endsWith("/index") ||
         currentPath.endsWith("/plug-radio-station");
 
-      if (isHomeLikePath && (sectionNodes.length > 0 || hasHash)) {
+      if (isHomeLikePath && sectionNodes.length) {
         const matchedSection = setActiveNavBySection();
         if (matchedSection) return;
       }
@@ -331,10 +329,6 @@
       scrollToHashOnLoad();
     });
 
-    /* =========================================
-       Close mobile nav when nav item is clicked
-    ========================================== */
-
     navLinks.forEach((link) => {
       link.addEventListener("click", () => {
         closeMobileNav();
@@ -345,23 +339,19 @@
        Audio player quality-of-life
     ========================================== */
 
-    const setPlayerState = (isPlaying) => {
-      if (!listenSection) return;
-      listenSection.classList.toggle("is-playing", isPlaying);
-    };
-
     if (player) {
       player.addEventListener("play", () => setPlayerState(true));
       player.addEventListener("pause", () => setPlayerState(false));
       player.addEventListener("ended", () => setPlayerState(false));
       player.addEventListener("emptied", () => setPlayerState(false));
+      player.addEventListener("error", () => setPlayerState(false));
     }
 
     /* =========================================
-       Simple external target hardening
+       External link hardening
     ========================================== */
 
-    document.querySelectorAll('a[target="_blank"]').forEach((link) => {
+    externalLinks.forEach((link) => {
       const rel = (link.getAttribute("rel") || "").trim();
       const relParts = rel ? rel.split(/\s+/) : [];
 
